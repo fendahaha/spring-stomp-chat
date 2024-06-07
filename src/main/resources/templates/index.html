@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+</head>
+<body>
+<style>
+    .msgs {
+        width: 400px;
+        height: 500px;
+        overflow: auto;
+        border: 1px solid black;
+    }
+</style>
+<p id="status"></p>
+<div class="msgs">
+    <div class="msg">Hello everyone!</div>
+</div>
+<div>
+    <input type="text" id="msg"><input type="button" value="send" id="send"/>
+</div>
+<div>
+    <input type="button" value="connect" id="connect"/>
+    <input type="button" value="disconnect" id="disconnect"/>
+</div>
+<script>
+    function set_content_status(b) {
+        $("#status").text(b ? 'connected' : 'disconnected')
+    }
+
+    function append_msg(msg) {
+        let h = `<div class="msg">${msg}</div>`;
+        $(".msgs").append(h);
+    }
+
+    const roomId = 'room-1';
+    const stompClient = new StompJs.Client({
+        brokerURL: 'ws://localhost:8080/portfolio',
+        connectionTimeout: 30 * 1000,
+        reconnectDelay: 5 * 1000,
+        connectHeaders: {roomId: roomId},
+        onConnect: (frame) => {
+            set_content_status(true);
+            stompClient.subscribe(`/topic/room/${roomId}`, (greeting) => {
+                let chatMsg = JSON.parse(greeting.body);
+                let user = chatMsg.user;
+                let msg = chatMsg.text;
+                append_msg(user + ':' + msg);
+            });
+        },
+        onWebSocketError: (error) => {
+            console.error('Error with websocket', error);
+        },
+        onStompError: (frame) => {
+            console.error('Broker reported error: ' + frame.headers['message']);
+            console.error('Additional details: ' + frame.body);
+        },
+        debug: (frame) => console.log(frame)
+    });
+
+    function connect() {
+        stompClient.activate();
+    }
+
+    function disconnect() {
+        stompClient.deactivate();
+        set_content_status(false);
+    }
+
+    function sendMsg(user, msg) {
+        stompClient.publish({
+            destination: `/app/room/${roomId}`,
+            body: JSON.stringify({'user': user, 'text': msg})
+        });
+    }
+
+    $(function () {
+        $("#connect").on('click', function () {
+            connect()
+        });
+        $("#disconnect").on('click', function () {
+            disconnect()
+        });
+        $("#send").on('click', function () {
+            let msg = $("#msg").val();
+            sendMsg('fenda', msg)
+        });
+    })
+</script>
+</body>
+</html>
