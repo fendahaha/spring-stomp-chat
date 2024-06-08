@@ -30,17 +30,21 @@ public class MyChannelInterceptor implements ChannelInterceptor {
         String sessionId = accessor.getSessionId();
         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
         if (StompCommand.CONNECT.equals(command)) {
-            List<String> nativeHeader = accessor.getNativeHeader("roomId");
-            if (nativeHeader != null) {
-                String roomId = nativeHeader.get(0);
+            List<String> groupIds = accessor.getNativeHeader("groupId");
+            List<String> roomIds = accessor.getNativeHeader("roomId");
+            if (groupIds != null && roomIds != null) {
+                String groupId = groupIds.get(0);
+                String roomId = roomIds.get(0);
+                sessionAttributes.put("groupId", groupId);
                 sessionAttributes.put("roomId", roomId);
-                RoomUserManager2.addUser(roomId, sessionId);
+                RoomUserManager.addUser(groupId, roomId, sessionId);
             }
         }
         if (StompCommand.DISCONNECT.equals(command)) {
+            String groupId = (String) sessionAttributes.get("groupId");
             String roomId = (String) sessionAttributes.get("roomId");
-            if (roomId != null) {
-                RoomUserManager2.removeUser(roomId, sessionId);
+            if (groupId != null && roomId != null) {
+                RoomUserManager.removeUser(groupId, roomId, sessionId);
             }
         }
         return message;

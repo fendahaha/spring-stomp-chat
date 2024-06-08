@@ -16,10 +16,10 @@ public class MessageController {
         this.template = template;
     }
 
-    @MessageMapping("/room/{id}")
-    public ChatMessage handle(ChatMessage msg, @DestinationVariable String id) {
+    @MessageMapping("/chats/{groupId}/{roomId}")
+    public ChatMessage handle(ChatMessage msg, @DestinationVariable String groupId, @DestinationVariable String roomId) {
         ChatMessage chatMessage = new ChatMessage(msg.user, msg.text);
-        this.template.convertAndSend("/topic/room/" + id, chatMessage);
+        this.template.convertAndSend("/topic/chats/" + groupId + "/" + roomId, chatMessage);
         return null;
     }
 }

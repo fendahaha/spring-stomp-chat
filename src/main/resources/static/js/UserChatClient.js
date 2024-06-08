@@ -2,20 +2,22 @@ class UserChatClient {
     stompClient;
     connected = false;
 
-    constructor(brokerURL, roomId, user, onMsg) {
-        this.user = user;
+    constructor(brokerURL, groupId, roomId, user, onMsg) {
+        this.groupId = groupId;
         this.roomId = roomId;
+        this.user = user;
         const self = this;
         let stompClient = new StompJs.Client({
             brokerURL: brokerURL,
             connectionTimeout: 30 * 1000,
             reconnectDelay: 5 * 1000,
             connectHeaders: {
-                roomId: roomId
+                groupId: groupId,
+                roomId: roomId,
             },
             onConnect: (frame) => {
                 self.connected = true;
-                stompClient.subscribe(`/topic/room/${roomId}`, (greeting) => {
+                stompClient.subscribe(`/topic/chats/${groupId}/${roomId}`, (greeting) => {
                     let chatMsg = JSON.parse(greeting.body);
                     onMsg && onMsg(chatMsg);
                 });
@@ -46,7 +48,7 @@ class UserChatClient {
     sendMsg(msg) {
         if (this.connected) {
             this.stompClient.publish({
-                destination: `/app/room/${this.roomId}`,
+                destination: `/app/chats/${this.groupId}/${this.roomId}`,
                 body: JSON.stringify({
                     'user': this.user,
                     'text': msg
@@ -64,3 +66,4 @@ class UserChatClient {
         return `${getRandomElement(adjectives)}${getRandomElement(nouns)}${numbers}`;
     }
 }
+

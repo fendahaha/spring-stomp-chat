@@ -1,41 +1,61 @@
 package com.example.springstompchat.config;
 
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RoomUserManager {
-    private static final HashMap<String, AtomicInteger> map;
+    private static final ConcurrentHashMap<String, HashMap<String, HashMap<String, Boolean>>> map;
 
     static {
-        map = new HashMap<String, AtomicInteger>();
+        map = new ConcurrentHashMap<String, HashMap<String, HashMap<String, Boolean>>>();
     }
 
-    public static void addUser(String id) {
-        AtomicInteger roomUsers = map.get(id);
-        if (roomUsers == null) {
-            roomUsers = createRoom(id);
+    public static void addUser(String groupId, String roomId, String sessionId) {
+        HashMap<String, HashMap<String, Boolean>> group = map.get(groupId);
+        HashMap<String, Boolean> room;
+        if (group == null) {
+            room = createRoom(groupId, roomId);
+        } else {
+            room = group.get(roomId);
+            if (room == null) {
+                room = createRoom(groupId, roomId);
+            }
         }
-        roomUsers.getAndIncrement();
+        room.put(sessionId, true);
     }
 
-    public static void removeUser(String id) {
-        AtomicInteger roomUsers = map.get(id);
-        if (roomUsers == null) {
-            roomUsers = createRoom(id);
+    public static void removeUser(String groupId, String roomId, String sessionId) {
+        HashMap<String, HashMap<String, Boolean>> group = map.get(groupId);
+        if (group != null) {
+            HashMap<String, Boolean> room = group.get(roomId);
+            if (room != null) {
+                room.remove(sessionId);
+            }
         }
-        roomUsers.getAndDecrement();
     }
 
-    public static synchronized AtomicInteger createRoom(String id) {
-        AtomicInteger atomicInteger = map.get(id);
-        if (atomicInteger == null) {
-            atomicInteger = new AtomicInteger(0);
-            map.put(id, atomicInteger);
+    public static synchronized HashMap<String, Boolean> createRoom(String groupId, String roomId) {
+        HashMap<String, HashMap<String, Boolean>> group = map.computeIfAbsent(groupId, k -> new HashMap<String, HashMap<String, Boolean>>());
+        HashMap<String, Boolean> room = group.computeIfAbsent(roomId, k -> new HashMap<String, Boolean>());
+        return room;
+    }
+
+    public static Integer getRoomUsers(String groupId, String roomId) {
+        HashMap<String, HashMap<String, Boolean>> group = map.get(groupId);
+        if (group != null) {
+            HashMap<String, Boolean> room = group.get(roomId);
+            if (room != null) {
+                return room.values().stream().filter(e -> e).toList().size();
+            }
         }
-        return atomicInteger;
+        return 0;
     }
 
-    public static AtomicInteger getRoom(String id) {
-        return map.get(id);
+    public static Object groups() {
+        return map;
+    }
+
+    public static Object rooms(String groupId) {
+        return map.get(groupId);
     }
 }
