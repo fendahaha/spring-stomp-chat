@@ -4,7 +4,7 @@ public class ChatMessage {
     public String user;
     public String text;
 
-    public Integer time;
+    public Long time;
 
     public ChatMessage() {
     }
@@ -18,7 +18,7 @@ public class ChatMessage {
         this.text = text;
     }
 
-    public ChatMessage(String user, String text, Integer time) {
+    public ChatMessage(String user, String text, Long time) {
         this.user = user;
         this.text = text;
         this.time = time;
@@ -40,11 +40,11 @@ public class ChatMessage {
         this.user = user;
     }
 
-    public Integer getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(Integer time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 }
