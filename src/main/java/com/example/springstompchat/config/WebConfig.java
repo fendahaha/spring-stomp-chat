@@ -14,7 +14,7 @@ public class WebConfig extends DelegatingWebMvcConfiguration {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("https://*.*.*,http://*.*.*")
+                .allowedOriginPatterns("https://siamsport.io,https://*.*.*,http://*.*.*")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .exposedHeaders("*")
