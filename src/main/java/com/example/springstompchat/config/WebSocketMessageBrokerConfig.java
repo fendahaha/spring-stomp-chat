@@ -17,7 +17,7 @@ public class WebSocketMessageBrokerConfig implements WebSocketMessageBrokerConfi
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/portfolio")
-                .setAllowedOriginPatterns("https://*.*.*,http://*.*.*")
+                .setAllowedOriginPatterns("https://*.*,https://*.*.*,http://*.*.*,https://*.*.*.*")
                 .addInterceptors(new MyHandshakeInterceptor());
     }
 
