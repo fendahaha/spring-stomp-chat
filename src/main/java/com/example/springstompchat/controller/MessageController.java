@@ -18,7 +18,7 @@ public class MessageController {
 
     @MessageMapping("/chats/{groupId}/{roomId}")
     public ChatMessage handle(ChatMessage msg, @DestinationVariable String groupId, @DestinationVariable String roomId) {
-        ChatMessage chatMessage = new ChatMessage(msg.user, msg.text);
+        ChatMessage chatMessage = new ChatMessage(msg.user, msg.text, msg.time);
         this.template.convertAndSend("/topic/chats/" + groupId + "/" + roomId, chatMessage);
         return null;
     }

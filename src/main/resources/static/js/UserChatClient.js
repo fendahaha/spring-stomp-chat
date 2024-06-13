@@ -51,7 +51,8 @@ class UserChatClient {
                 destination: `/app/chats/${this.groupId}/${this.roomId}`,
                 body: JSON.stringify({
                     'user': this.user,
-                    'text': msg
+                    'text': msg,
+                    'time':Date.now()
                 })
             });
             return true
